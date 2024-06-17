@@ -1,0 +1,36 @@
+(main)
+sudo -u jenkins ssh-keygen -t rsa -b 2048 -f /var/lib/jenkins/.ssh/id_rsa -q -N ""# Copy SSH key to the slave server
+
+sudo -u jenkins ssh-copy-id -i /var/lib/jenkins/.ssh/id_rsa.pub jenkins@server_ip
+ 
+
+
+sudo -u jenkins ssh jenkins@server_ip
+ 
+(slave)
+sudo useradd -m -s /bin/bash jenkins
+
+sudo passwd jenkins
+ 
+ 
+ 
+sudo chown -R jenkins:jenkins /home/jenkins
+
+sudo chmod -R 755 /home/jenkins
+
+mkdir -p /home/jenkins/.ssh
+
+mkdir -p /home/jenkins/agent
+
+sudo chown -R jenkins:jenkins /home/jenkins/.ssh
+
+sudo chown -R jenkins:jenkins /home/jenkins/agent
+
+sudo chmod 700 /home/jenkins/.ssh
+
+sudo chmod 755 /home/jenkins/agent
+
+ 
+main
+sudo systemctl restart jenkins
+
