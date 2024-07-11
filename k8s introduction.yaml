@@ -1,5 +1,5 @@
 k8s ki file ki details introduction
-ChatGPT
+
 Kubernetes (k8s) configuration files ko likhne aur samajhne ke liye kuch basic components aur concepts ka pata hona chahiye. Ye files YAML (Yet Another Markup Language) format mein likhi jati hain. YAML files easy-to-read hoti hain aur k8s resources ko define karne ke liye standard hai.
 
 Common Components of k8s Configuration Files:
@@ -135,9 +135,9 @@ Ye basic components aur examples aapko Kubernetes configuration files samajhne m
 
 
 
-kya hum isme ek ya ek se adhik container bna sakte hai
-ChatGPT
-Haan, Kubernetes mein aap ek Pod ke andar ek ya ek se adhik containers bana sakte hain. Ek Pod multiple containers ko host kar sakta hai jo ek shared network namespace aur storage volumes use karte hain. Ye containers ek doosre ke saath inter-process communication (IPC) ke through baat kar sakte hain aur ek doosre ke file system ko share kar sakte hain.
+for multiple containers
+
+Ek Pod multiple containers ko host kar sakta hai jo ek shared network namespace aur storage volumes use karte hain. Ye containers ek doosre ke saath inter-process communication (IPC) ke through baat kar sakte hain aur ek doosre ke file system ko share kar sakte hain.
 
 Example of a Pod with Multiple Containers:
 yaml
@@ -219,7 +219,7 @@ log-volume: Ek emptyDir volume jo ephemeral storage provide karta hai aur contai
 Is tarah aap Kubernetes mein multiple containers ko ek Pod mein efficiently use kar sakte hain, jo aapko flexibility aur modularity provide karta hai aapke application deployments ke liye.
 
 kind ka kya use hota h or isme kya kya aata hai
-ChatGPT
+ 
 kind ka use Kubernetes configuration files mein resource type define karne ke liye hota hai. Ye batata hai ki aap kaunse type ka Kubernetes object bana rahe hain, jaise Pod, Service, Deployment, ConfigMap, etc. Har resource type ka apna specific structure aur properties hoti hain.
 
 Common kind Values and Their Uses:
@@ -470,7 +470,7 @@ spec:
 Ye sabhi kind values aur examples aapko Kubernetes resources ko efficiently define aur manage karne mein madad karte hain. Har resource ka apna specific use-case aur importance hota hai, jo aapke applications ko deploy, scale, aur manage karne mein help karta hai.
 
 resource type kya kya hote hai
-ChatGPT
+ 
 Kubernetes mein kaafi saare resource types hote hain jo different functionalities aur use-cases ke liye use kiye jate hain. Ye resources cluster mein workloads ko manage karne, configuration ko store karne, storage ko handle karne, aur network ko configure karne mein madad karte hain.
 
 Common Kubernetes Resource Types:
@@ -585,8 +585,9 @@ spec:
     path: /mnt/data
 Ye resource types aur unke examples aapko Kubernetes environment mein different functionalities ko samajhne aur implement karne mein madad karenge. Kubernetes ka powerful resource model aapko complex applications ko effectively deploy aur manage karne mein help karta hai.
 
-ek file likho jise sabhi resources ka use ho rha ho aor uski detail bhi do
-ChatGPT
+
+details: use of components
+ 
 A comprehensive example likhna jismein sabhi major Kubernetes resources ka use ho raha ho, ek typical application stack ko showcase karne ke liye helpful hoga. Is example mein hum ek application deploy karenge jo multiple components ko include karega jaise ki Pods, Services, Deployments, ConfigMaps, Secrets, Persistent Volumes, aur Ingress.
 
 Example of a Kubernetes Configuration File
