@@ -1,0 +1,778 @@
+k8s ki file ki details introduction
+
+Kubernetes (k8s) configuration files ko likhne aur samajhne ke liye kuch basic components aur concepts ka pata hona chahiye. Ye files YAML (Yet Another Markup Language) format mein likhi jati hain.
+YAML files easy-to-read hoti hain aur k8s resources ko define karne ke liye standard hai.
+
+Common Components of k8s Configuration Files:
+apiVersion:
+
+Ye specify karta hai ki resource kaunse Kubernetes API version ka use kar raha hai.
+Example: apiVersion: v1 ya apiVersion: apps/v1
+kind:
+
+Ye batata hai ki resource ka type kya hai, jaise Pod, Service, Deployment, etc.
+Example: kind: Pod
+metadata:
+
+Resource ke baare mein basic information provide karta hai jaise name, labels, aur namespace.
+Example:
+yaml
+Copy code
+metadata:
+  name: my-pod
+  labels:
+    app: my-app
+spec:
+
+Resource ki specifications ya desired state ko define karta hai.
+Example:
+yaml
+Copy code
+spec:
+  containers:
+  - name: my-container
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80
+status (Optional):
+
+Resource ki current state ko describe karta hai. Ye usually Kubernetes ke dwara manage hota hai aur user-defined configuration files mein common nahi hai.
+Example of a Simple Pod Configuration File:
+yaml
+Copy code
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+  labels:
+    app: my-app
+spec:
+  containers:
+  - name: my-container
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80
+Explanation of the Example:
+apiVersion: v1 batata hai ki ye configuration v1 API version ka use karta hai.
+kind: Pod batata hai ki ye configuration ek Pod resource ko define karta hai.
+metadata:
+name: Pod ka naam my-pod rakha gaya hai.
+labels: Ek label app: my-app assign kiya gaya hai jo resource ko identify karne mein madad karta hai.
+spec:
+containers: Ek list jo Pod mein run hone wale containers ko define karti hai.
+name: Container ka naam my-container rakha gaya hai.
+image: Nginx image ka version nginx:1.14.2 use kiya gaya hai.
+ports: Container ke port 80 ko expose kiya gaya hai.
+Common k8s Resources and Their Uses:
+Pod:
+
+Kubernetes ka sabse chhota deployable unit. Ek ya zyada containers ko host karta hai.
+Example:
+yaml
+Copy code
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+  - name: my-container
+    image: nginx
+Service:
+
+Pods ko expose karta hai network service ke roop mein.
+Example:
+yaml
+Copy code
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: my-app
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+Deployment:
+
+Pods ko manage karta hai aur unki desired state ko ensure karta hai.
+Example:
+yaml
+Copy code
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx
+ConfigMap:
+
+Configuration data ko store karta hai jo Pods mein use hota hai.
+Example:
+yaml
+Copy code
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config
+data:
+  key: value
+Ye basic components aur examples aapko Kubernetes configuration files samajhne mein madad karenge.
+
+
+
+
+
+for multiple containers
+
+Ek Pod multiple containers ko host kar sakta hai jo ek shared network namespace aur storage volumes use karte hain.
+Ye containers ek doosre ke saath inter-process communication (IPC) ke through baat kar sakte hain aur ek doosre ke file system ko share kar sakte hain.
+
+Example of a Pod with Multiple Containers:
+yaml
+Copy code
+apiVersion: v1
+kind: Pod
+metadata:
+  name: multi-container-pod
+spec:
+  containers:
+  - name: nginx-container
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80
+  - name: sidecar-container
+    image: busybox
+    command: ['sh', '-c', 'while true; do echo hello; sleep 10; done']
+Explanation of the Example:
+apiVersion: v1 batata hai ki ye configuration v1 API version ka use karta hai.
+kind: Pod batata hai ki ye configuration ek Pod resource ko define karta hai.
+metadata:
+name: Pod ka naam multi-container-pod rakha gaya hai.
+spec:
+containers: Containers ki ek list jo Pod mein run hone wale containers ko define karti hai.
+nginx-container:
+name: Container ka naam nginx-container rakha gaya hai.
+image: Nginx image ka version nginx:1.14.2 use kiya gaya hai.
+ports: Container ke port 80 ko expose kiya gaya hai.
+sidecar-container:
+name: Container ka naam sidecar-container rakha gaya hai.
+image: Busybox image use kiya gaya hai.
+command: Ek simple command run karta hai jo "hello" print karta hai har 10 seconds mein.
+Use Cases for Multiple Containers in a Pod:
+Sidecar Containers:
+
+Ek common pattern jahan ek main application container aur ek sidecar container hota hai jo support services provide karta hai jaise logging, monitoring, configuration update, etc.
+Adapter Containers:
+
+Jo main container ke data ko format ya transform karte hain before sending it to another service.
+Proxy Containers:
+
+Jo main container ke aage proxy ka kaam karte hain, jaise load balancing, request routing, etc.
+Helper Containers:
+
+Jo initialization ya setup tasks perform karte hain before main container start hota hai.
+Example of a Pod with Sidecar Container:
+yaml
+Copy code
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-sidecar
+spec:
+  containers:
+  - name: app-container
+    image: my-app:latest
+    ports:
+    - containerPort: 8080
+  - name: logging-sidecar
+    image: fluentd
+    volumeMounts:
+    - name: log-volume
+      mountPath: /var/log
+  volumes:
+  - name: log-volume
+    emptyDir: {}
+Explanation of the Sidecar Example:
+apiVersion: v1
+kind: Pod
+metadata:
+name: Pod ka naam pod-with-sidecar
+spec:
+containers:
+app-container: Main application container jo my-app image use karta hai aur port 8080 expose karta hai.
+logging-sidecar: Sidecar container jo fluentd image use karta hai aur logs collect karta hai.
+volumeMounts: Ek shared volume log-volume mount karta hai.
+volumes:
+log-volume: Ek emptyDir volume jo ephemeral storage provide karta hai aur containers ke beech share hota hai.
+Is tarah aap Kubernetes mein multiple containers ko ek Pod mein efficiently use kar sakte hain, jo aapko flexibility aur modularity provide karta hai aapke application deployments ke liye.
+
+kind ka kya use hota h or isme kya kya aata hai
+ 
+kind ka use Kubernetes configuration files mein resource type define karne ke liye hota hai. 
+Ye batata hai ki aap kaunse type ka Kubernetes object bana rahe hain, jaise Pod, Service, Deployment, ConfigMap, etc. Har resource type ka apna specific structure aur properties hoti hain.
+
+Common kind Values and Their Uses:
+Pod:
+
+Ek ya zyada containers ko host karta hai. Sabse chhota deployable unit hai.
+Example:
+yaml
+Copy code
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+  - name: my-container
+    image: nginx
+Service:
+
+Pods ko expose karta hai ek network service ke roop mein. Load balancing aur discovery ke liye use hota hai.
+Example:
+yaml
+Copy code
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: my-app
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+Deployment:
+
+Pods ko manage karta hai aur unki desired state ko ensure karta hai. Rollouts aur rollbacks ke liye use hota hai.
+Example:
+yaml
+Copy code
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx
+ConfigMap:
+
+Configuration data ko store karta hai jo Pods mein use hota hai.
+Example:
+yaml
+Copy code
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config
+data:
+  key: value
+Secret:
+
+Sensitive data (e.g., passwords, tokens) ko store karta hai jo Pods mein securely use hota hai.
+Example:
+yaml
+Copy code
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-secret
+type: Opaque
+data:
+  username: YWRtaW4=
+  password: MWYyZDFlMmU2N2Rm
+PersistentVolume (PV):
+
+Storage resource ko define karta hai jo cluster mein exist karta hai.
+Example:
+yaml
+Copy code
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  hostPath:
+    path: /mnt/data
+PersistentVolumeClaim (PVC):
+
+PersistentVolume ko request karta hai. Pods mein storage ko use karne ke liye use hota hai.
+Example:
+yaml
+Copy code
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+Namespace:
+
+Cluster resources ko logical groups mein organize karta hai.
+Example:
+yaml
+Copy code
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-namespace
+Ingress:
+
+HTTP and HTTPS routes ko define karta hai jo external traffic ko cluster services tak pahuchata hai.
+Example:
+yaml
+Copy code
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+spec:
+  rules:
+  - host: myapp.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: my-service
+            port:
+              number: 80
+Additional Resource Types:
+DaemonSet:
+
+Ensures that all (or some) Nodes run a copy of a Pod.
+Example:
+yaml
+Copy code
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: my-daemonset
+spec:
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx
+StatefulSet:
+
+Manages stateful applications. Unlike Deployments, StatefulSets give Pods unique, persistent identities.
+Example:
+yaml
+Copy code
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: my-statefulset
+spec:
+  serviceName: "my-service"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx
+        volumeMounts:
+        - name: my-volume
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+  - metadata:
+      name: my-volume
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+Job:
+
+Creates one or more Pods and ensures that a specified number of them successfully terminate.
+Example:
+yaml
+Copy code
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: my-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: my-container
+        image: busybox
+        command: ["sh", "-c", "echo Hello Kubernetes! && sleep 30"]
+      restartPolicy: OnFailure
+CronJob:
+
+Runs Jobs on a scheduled basis.
+Example:
+yaml
+Copy code
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: my-cronjob
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: my-container
+            image: busybox
+            command: ["sh", "-c", "date; echo Hello from the Kubernetes cluster"]
+          restartPolicy: OnFailure
+Ye sabhi kind values aur examples aapko Kubernetes resources ko efficiently define aur manage karne mein madad karte hain. 
+Har resource ka apna specific use-case aur importance hota hai, jo aapke applications ko deploy, scale, aur manage karne mein help karta hai.
+
+resource type kya kya hote hai : -
+ 
+Kubernetes mein kaafi saare resource types hote hain jo different functionalities aur use-cases ke liye use kiye jate hain. 
+Ye resources cluster mein workloads ko manage karne, configuration ko store karne, storage ko handle karne, aur network ko configure karne mein madad karte hain.
+
+Common Kubernetes Resource Types:
+Workload Resources:
+
+Pod: Sabse chhota deployable unit jo ek ya zyada containers ko host karta hai.
+ReplicaSet: Pods ka desired number ensure karta hai aur unhe maintain karta hai.
+Deployment: ReplicaSets ko manage karta hai aur rolling updates aur rollbacks ko enable karta hai.
+StatefulSet: Stateful applications ko manage karta hai jo stable, unique network identities aur persistent storage ke saath run hoti hain.
+DaemonSet: Ensures har Node pe ek copy of Pod run karta hai, jo cluster-level services jaise monitoring ya logging ke liye use hota hai.
+Job: Ek ya zyada Pods create karta hai aur ensure karta hai ki specified number of Pods successfully terminate ho jayein.
+CronJob: Scheduled Jobs run karta hai jo specified intervals pe execute hote hain.
+ReplicationController: Ensures specified number of Pod replicas run karte hain. ReplicaSet ka predecessor.
+Service Resources:
+
+Service: Pods ko network service ke roop mein expose karta hai aur load balancing provide karta hai.
+Ingress: HTTP and HTTPS routes ko define karta hai jo external traffic ko cluster services tak pahuchata hai.
+Endpoint: Service ke endpoints ko define karta hai, jo manually managed service discovery ke liye use hota hai.
+Configuration Resources:
+
+ConfigMap: Configuration data ko store aur manage karta hai jo Pods mein use hota hai.
+Secret: Sensitive data (e.g., passwords, tokens) ko securely store karta hai aur Pods mein use hota hai.
+ResourceQuota: Resource usage ko limit karta hai ek namespace ke andar.
+LimitRange: Containers ke resource requests aur limits ko enforce karta hai ek namespace ke andar.
+Storage Resources:
+
+PersistentVolume (PV): Storage resource ko define karta hai jo cluster mein exist karta hai aur dynamically provisioned ho sakta hai.
+PersistentVolumeClaim (PVC): PersistentVolume ko request karta hai aur Pods mein storage ko use karne ke liye use hota hai.
+StorageClass: Storage provisioning ko define karta hai aur different storage backends ko represent karta hai.
+Cluster Management Resources:
+
+Namespace: Cluster resources ko logical groups mein organize karta hai, jo resource management aur isolation ko enable karta hai.
+Node: Cluster ke nodes ko represent karta hai jo workloads ko run karte hain.
+ServiceAccount: Pods ke liye service accounts ko define karta hai jo RBAC (Role-Based Access Control) policies ke sath use hote hain.
+Role: Specific namespaces ke andar resources ke access ko define karta hai.
+ClusterRole: Cluster-wide resources ke access ko define karta hai.
+RoleBinding: Specific namespaces mein roles ko users ya groups ke sath bind karta hai.
+ClusterRoleBinding: Cluster-wide roles ko users ya groups ke sath bind karta hai.
+Network Policies:
+
+NetworkPolicy: Pods ke network traffic ko control karta hai, jo ingress aur egress rules ko define karta hai.
+Examples of Some Resource Types:
+Pod:
+yaml
+Copy code
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+  - name: my-container
+    image: nginx
+Deployment:
+yaml
+Copy code
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: nginx
+Service:
+yaml
+Copy code
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: my-app
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+ConfigMap:
+yaml
+Copy code
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config
+data:
+  key: value
+PersistentVolume:
+yaml
+Copy code
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  hostPath:
+    path: /mnt/data
+Ye resource types aur unke examples aapko Kubernetes environment mein different functionalities ko samajhne aur implement karne mein madad karenge. 
+Kubernetes ka powerful resource model aapko complex applications ko effectively deploy aur manage karne mein help karta hai.
+
+
+details: use of components
+ 
+A comprehensive example likhna jismein sabhi major Kubernetes resources ka use ho raha ho, ek typical application stack ko showcase karne ke liye helpful hoga. 
+Is example mein hum ek application deploy karenge jo multiple components ko include karega jaise ki Pods, Services, Deployments, ConfigMaps, Secrets, Persistent Volumes, aur Ingress.
+
+Example of a Kubernetes Configuration File
+1. Namespace
+yaml
+Copy code
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: example-namespace
+2. ConfigMap
+yaml
+Copy code
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: example-namespace
+data:
+  configKey: configValue
+3. Secret
+yaml
+Copy code
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+  namespace: example-namespace
+type: Opaque
+data:
+  username: YWRtaW4=    # base64 encoded "admin"
+  password: cGFzc3dvcmQ= # base64 encoded "password"
+4. PersistentVolume
+yaml
+Copy code
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-storage
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: "/mnt/data"
+5. PersistentVolumeClaim
+yaml
+Copy code
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-storage
+  namespace: example-namespace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: manual
+6. Deployment
+yaml
+Copy code
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+  namespace: example-namespace
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: main-container
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+        env:
+        - name: CONFIG_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: configKey
+        - name: USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: username
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: password
+        volumeMounts:
+        - name: storage
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: pvc-storage
+7. Service
+yaml
+Copy code
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+  namespace: example-namespace
+spec:
+  selector:
+    app: my-app
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+8. Ingress
+yaml
+Copy code
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  namespace: example-namespace
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: my-service
+            port:
+              number: 80
+Explanation of Each Resource:
+Namespace:
+
+Resource: Namespace
+Description: Namespace resource logical separation provide karta hai cluster resources ko isolate karne ke liye.
+ConfigMap:
+
+Resource: ConfigMap
+Description: Configuration data ko key-value pairs ke form mein store karta hai jo containers ke environment variables mein inject hota hai.
+Secret:
+
+Resource: Secret
+Description: Sensitive data jaise passwords, tokens, aur keys ko securely store karta hai. Data base64 encoding ke through encrypted hota hai.
+PersistentVolume (PV):
+
+Resource: PersistentVolume
+Description: Storage resource ko define karta hai jo cluster ke nodes ke sath directly bind hota hai.
+PersistentVolumeClaim (PVC):
+
+Resource: PersistentVolumeClaim
+Description: PersistentVolume resources ko request karta hai. Ye specify karta hai ki kitni storage chahiye aur kaunsa access mode use hoga.
+Deployment:
+
+Resource: Deployment
+Description: ReplicaSets ko manage karta hai jo Pods ko manage karte hain. Deployment Pods ko automatically update aur rollback kar sakta hai.
+Service:
+
+Resource: Service
+Description: Pods ko network service ke roop mein expose karta hai aur load balancing provide karta hai. Service Pods ke dynamic IP addresses ko manage karta hai.
+Ingress:
+
+Resource: Ingress
+Description: HTTP aur HTTPS routes ko define karta hai jo external traffic ko cluster services tak pahunchata hai. Ye load balancing aur SSL termination provide karta hai.
+Ye example Kubernetes configuration file multiple resources ko showcase karta hai jo ek typical application stack ke liye useful hain. 
+Ye resources Kubernetes ke core functionalities ko cover karte hain jaise configuration management, secret management, storage management, deployment, service exposure, aur ingress routing.
