@@ -64,4 +64,4 @@ sudo systemctl restart kubelet
 sudo systemctl status kubelet
 
 
-
+deamon reload
